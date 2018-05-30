@@ -3,8 +3,10 @@ extern crate futures;
 use network::futures::channel::mpsc;
 
 pub trait Connectable {
-    fn set_tx(&mut self, mpsc::Sender<u32>);
-    fn set_rx(&mut self, mpsc::Receiver<u32>);
+    type Item;
+
+    fn set_tx(&mut self, mpsc::Sender<Self::Item>);
+    fn set_rx(&mut self, mpsc::Receiver<Self::Item>);
 }
 
 pub fn connect<T, U>(nodes: &mut [T], links: &[(usize, usize)])
@@ -19,8 +21,8 @@ where
             panic!("Cannot connect node to itself");
         }
 
-        let (first_tx, first_rx) = mpsc::channel::<u32>(1000);
-        let (second_tx, second_rx) = mpsc::channel::<u32>(1000);
+        let (first_tx, first_rx) = mpsc::channel::<T::Item>(1000);
+        let (second_tx, second_rx) = mpsc::channel::<T::Item>(1000);
 
         nodes[*i].set_tx(first_tx);
         nodes[*i].set_rx(second_rx);

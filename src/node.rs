@@ -2,27 +2,26 @@ extern crate futures;
 
 use super::network;
 use std::collections::HashMap;
-use std::sync::mpsc;
-use node::futures::channel;
+//use std::sync::mpsc;
+use node::futures::channel::mpsc;
 
-pub enum Message<T, U> {
-    New((T, U)),
-    Max((T, U)),
+pub enum Message<T> {
+    New((T, u32)),
+    Max((T, u32)),
 }
 
-pub struct Node<T, U, V> {
+pub struct Node<T> {
     id: T,
-    n: U,
-    senders: Vec<mpsc::Sender<V>>,
-    receivers: Vec<mpsc::Receiver<V>>,
+    n: u32,
+    senders: Vec<mpsc::Sender<Message<T>>>,
+    receivers: Vec<mpsc::Receiver<Message<T>>>,
 }
 
-impl<T, U> Node<T, U, Message<T, U>>
+impl<T> Node<T>
 where
     T: Eq + ::std::hash::Hash + Copy + ::std::fmt::Display,
-    U: Ord + Copy + ::std::fmt::Display,
 {
-    pub fn new(id: T, n: U) -> Node<T, U, Message<T, U>> {
+    pub fn new(id: T, n: u32) -> Node<T> {
         Node {
             n,
             id,
@@ -31,15 +30,15 @@ where
         }
     }
 
-    pub fn set_number(&mut self, new: U) {
+    pub fn set_number(&mut self, new: u32) {
         self.n = new;
     }
 
     pub fn compare(&self, n: usize) {
-        
+
     }
 
-    pub fn max_number(&self, n: usize) {
+    /* pub fn max_number(&self, n: usize) {
         for sender in self.senders.iter() {
             if let Err(_) = sender.send(Message::New((self.id, self.n))) {
                 panic!("Could not send on channel");
@@ -102,16 +101,15 @@ where
 
         // Wait for other nodes to finish.
         loop {}
-    }
+    } */
 }
 
-impl<T, U, V> network::Connectable for Node<T, U, V> {
-    type Item = V;
-
-    fn set_tx(&mut self, tx: mpsc::Sender<V>) {
+impl<T> network::Connectable for Node<T> {
+    type Item = Message<T>;
+    fn set_tx(&mut self, tx: mpsc::Sender<Self::Item>) {
         self.senders.push(tx);
     }
-    fn set_rx(&mut self, rx: mpsc::Receiver<V>) {
+    fn set_rx(&mut self, rx: mpsc::Receiver<Self::Item>) {
         self.receivers.push(rx);
     }
 }
