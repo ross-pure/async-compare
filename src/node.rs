@@ -93,6 +93,7 @@ where
             Some(m) => println!("{} decided {}", self.id, m),
         };
 
+        // Wait for other nodes to finish.
         loop {}
     }
 }
