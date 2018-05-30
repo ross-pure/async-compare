@@ -1,6 +1,9 @@
+extern crate futures;
+
 use super::network;
 use std::collections::HashMap;
 use std::sync::mpsc;
+use node::futures::channel;
 
 pub enum Message<T, U> {
     New((T, U)),
@@ -30,6 +33,10 @@ where
 
     pub fn set_number(&mut self, new: U) {
         self.n = new;
+    }
+
+    pub fn compare(&self, n: usize) {
+        
     }
 
     pub fn max_number(&self, n: usize) {
